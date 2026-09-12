@@ -1,0 +1,16 @@
+{
+  "name": "AgriChem Pro Field Guide",
+  "short_name": "AgriChem Pro",
+  "description": "A searchable pesticide database and resistance-management field guide.",
+  "lang": "bn",
+  "dir": "ltr",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f2efe7",
+  "theme_color": "#234c3d",
+  "icons": [
+    { "src": "/agrichem-pro-favicon.png", "sizes": "64x64", "type": "image/png" },
+    { "src": "/agrichem-pro-apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/agrichem-pro-logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
