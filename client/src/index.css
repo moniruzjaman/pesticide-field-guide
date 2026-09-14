@@ -206,6 +206,7 @@ footer { padding: 54px 10vw 30px; color: var(--paper); background: var(--forest-
 .modal-grid > div { display: flex; flex-direction: column; gap: 6px; padding: 14px; background: var(--paper-soft); }
 .modal-grid span { color: var(--ink-soft); font: 9px "DM Mono", monospace; text-transform: uppercase; letter-spacing: .08em; }
 .modal-grid b { color: var(--forest); font-size: 12px; }
+.mapping-detail { display: block; margin-top: 4px; color: var(--ink-soft); font: 9px "DM Mono", monospace; text-transform: uppercase; letter-spacing: .04em; }
 .modal-note { display: flex; gap: 9px; margin-top: 23px; padding-top: 15px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 10px; line-height: 1.5; }
 .modal-note svg { flex: 0 0 auto; color: var(--forest); }
 @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
