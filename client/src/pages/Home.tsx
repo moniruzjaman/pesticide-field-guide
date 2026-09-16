@@ -17,6 +17,9 @@ import {
   Search,
   ShieldCheck,
   Sprout,
+  Store,
+  Tractor,
+  Users,
   X,
 } from "lucide-react";
 
@@ -79,7 +82,7 @@ export default function Home() {
   }, []);
   const copy = bn ? {
     overview: "সারসংক্ষেপ", products: "পণ্য খুঁজুন", rotation: "MoA ঘূর্ণন", model: "ডেটা মডেল", source: "উৎস নোট",
-    eyebrow: "কৃষি সম্প্রসারণ কর্মকর্তাদের জন্য ব্যবহারিক রেফারেন্স", heroA: "পরের", heroB: "মোড অফ অ্যাকশন বেছে নিন।",
+    eyebrow: "কৃষি সম্প্রসারণ কর্মকর্তা, খুচরা বিক্রেতা ও কৃষকদের জন্য মাঠ-উপযোগী রেফারেন্স", heroA: "পরের", heroB: "মোড অফ অ্যাকশন বেছে নিন।",
     heroLede: "নিবন্ধিত কীটনাশক, প্রতিরোধ ব্যবস্থাপনা গ্রুপ এবং ঘূর্ণন-সঙ্গীর মাঠ-উপযোগী সূচি—শেষ স্প্রের পরের সিদ্ধান্তের জন্য সাজানো।",
     finder: "পণ্য খুঁজুন", readRotation: "ঘূর্ণন গাইড পড়ুন", fieldNote: "মাঠ নোট ০১", sameTarget: "ভিন্ন গ্রুপ। একই লক্ষ্য।", rotationRec: "ঘূর্ণনই সুপারিশ।",
     approved: "অনুমোদিত পণ্য", mapped: "MoA-তে ম্যাপ করা", groups: "MoA গ্রুপ", rule: "সিদ্ধান্তের নিয়ম", never: "একই গ্রুপ পুনরাবৃত্তি নয়",
@@ -88,17 +91,31 @@ export default function Home() {
     productTitle: "একটি নিবন্ধিত পণ্য খুঁজুন।", productDesc: "বাণিজ্যিক নাম, সক্রিয় উপাদান, ফসল, পোকা বা নিবন্ধন নম্বর দিয়ে খুঁজুন।",
     rotationTitle: "গ্রুপ বদলান।", rotationDesc: "শেষ স্প্রের গ্রুপটিকে বাদ দেওয়ার নিয়ম হিসেবে নিন। তারপর একই লক্ষ্য পূরণ করে এমন অন্য গ্রুপ বেছে নিন।",
     modelTitle: "সংযোগযোগ্য একটি মাঠ-গাইড।", modelDesc: "ওয়াইড CSV-এর সহজতা রাখুন, আর ভেতরের ডেটাবেসকে রাখুন নরমালাইজড ও অডিটযোগ্য।",
+    personaKicker: "যাদের জন্য এই গাইড", personaTitle: "একই তথ্য। ভিন্ন প্রয়োজন।",
+    personaOfficerTitle: "সম্প্রসারণ কর্মকর্তা",
+    personaOfficerDesc: "মাঠ পরিদর্শনের সময় দ্রুত যাচাই করুন — নিবন্ধন নম্বর, বৈধ মাত্রা এবং প্রতিরোধ এড়াতে সঠিক ঘূর্ণন-সঙ্গী গ্রুপ। কৃষককে ভুল সুপারিশ দেওয়ার ঝুঁকি কমান।",
+    personaRetailerTitle: "খুচরা বিক্রেতা ও ডিলার",
+    personaRetailerDesc: "বিক্রির আগে নিশ্চিত হোন পণ্যটি নিবন্ধিত কিনা। কৃষককে একই মোড অফ অ্যাকশন বারবার বিক্রি করা এড়িয়ে দোকানে প্রতিরোধ-বান্ধব ঘূর্ণন-সঙ্গী মজুদ রাখুন।",
+    personaFarmerTitle: "কৃষক",
+    personaFarmerDesc: "ফসল ও পোকার নাম লিখে সহজে খুঁজুন। স্প্রে করার আগে নিরাপদ মাত্রা ও ফসল তোলার পূর্বের অপেক্ষার সময় (PHI) দেখে নিন — একই ওষুধ বারবার ব্যবহার এড়ান।",
   } : {
     overview: "Overview", products: "Product finder", rotation: "MoA rotation", model: "Data model", source: "Source notes",
-    eyebrow: "{copy.eyebrow}", heroA: "Choose the next", heroB: "mode of action.",
-    heroLede: "{copy.heroLede}",
+    eyebrow: "A field reference for extension officers, retailers, and farmers", heroA: "Choose the next", heroB: "mode of action.",
+    heroLede: "A field-ready index of registered pesticides, resistance-management groups, and rotation partners — organized around the decision that comes right after the last spray.",
     finder: "Open product finder", readRotation: "Read rotation guide", fieldNote: "FIELD NOTE 01", sameTarget: "Different group. Same target.", rotationRec: "Rotation is the recommendation.",
     approved: "approved products", mapped: "mapped to MoA", groups: "MoA groups", rule: "decision rule", never: "never repeat a group",
-    logic: "{copy.logic}", guideAround: "The guide is organized around the", nextSpray: "next spray.", seePartners: "See rotation partners",
-    atGlance: "{copy.atGlance}", startGroups: "{copy.startGroups}", viewGroups: "View all groups",
-    productTitle: "{copy.productTitle}", productDesc: "{copy.productDesc}",
-    rotationTitle: "{copy.rotationTitle}", rotationDesc: "{copy.rotationDesc}",
-    modelTitle: "{copy.modelTitle}", modelDesc: "{copy.modelDesc}",
+    logic: "Field logic", guideAround: "The guide is organized around the", nextSpray: "next spray.", seePartners: "See rotation partners",
+    atGlance: "At a glance", startGroups: "Start with the groups that shape the next field decision.", viewGroups: "View all groups",
+    productTitle: "Find a registered product.", productDesc: "Search by trade name, active ingredient, crop, pest, or registration number.",
+    rotationTitle: "Change the group.", rotationDesc: "Treat the last spray's group as excluded. Then choose a different group that still controls the same target.",
+    modelTitle: "A field guide that's actually connected.", modelDesc: "Keep the simplicity of a wide CSV — and a database underneath that's normalized and auditable.",
+    personaKicker: "Who this is for", personaTitle: "Same data. Different job to do.",
+    personaOfficerTitle: "Extension Officer",
+    personaOfficerDesc: "Verify registration, legal dosage, and the right rotation partner in seconds during a field visit — before you recommend anything.",
+    personaRetailerTitle: "Retailer & Dealer",
+    personaRetailerDesc: "Confirm a product is registered before you sell it. Stock rotation-friendly partners instead of moving the same mode of action every season.",
+    personaFarmerTitle: "Farmer",
+    personaFarmerDesc: "Search by crop and pest. Check the safe dose and pre-harvest interval before you spray — and avoid using the same chemical again and again.",
   };
 
   const cropOptions = useMemo(() => ["All crops", ...Array.from(new Set(catalog.flatMap((p) => p.crop.split(" · ")).filter(Boolean)).values()).sort()], []);
@@ -147,6 +164,14 @@ export default function Home() {
           </div>
         </section>
         <section className="stats-band"><Stat value="4,475" label="approved products" detail="underlying source statement" /><Stat value="68.4%" label="mapped to MoA" detail="3,060 rows mapped across IRAC, FRAC, and HRAC" /><Stat value="45" label="MoA groups" detail="IRAC · FRAC · HRAC" /><Stat value="01" label="decision rule" detail="never repeat a group" /></section>
+        <section className="content-section persona-section">
+          <div className="section-heading"><div><span className="section-kicker">{copy.personaKicker}</span><h2>{copy.personaTitle}</h2></div></div>
+          <div className="persona-grid">
+            <div className="persona-card officer"><div className="persona-icon"><Users size={18} /></div><h3>{copy.personaOfficerTitle}</h3><p>{copy.personaOfficerDesc}</p></div>
+            <div className="persona-card retailer"><div className="persona-icon"><Store size={18} /></div><h3>{copy.personaRetailerTitle}</h3><p>{copy.personaRetailerDesc}</p></div>
+            <div className="persona-card farmer"><div className="persona-icon"><Tractor size={18} /></div><h3>{copy.personaFarmerTitle}</h3><p>{copy.personaFarmerDesc}</p></div>
+          </div>
+        </section>
         <section className="content-section split-section">
           <div className="section-intro"><span className="section-kicker">{copy.logic}</span><h2>{copy.guideAround} <em>{copy.nextSpray}</em></h2><p>Products are not the starting point. The starting point is the mode of action used last, the pest you still need to control, and a partner group that breaks the resistance cycle.</p><button className="button-outline" onClick={() => navigate("rotation")}>{copy.seePartners} <ArrowUpRight size={15} /></button></div>
           <div className="logic-card"><div className="logic-step"><span>01</span><div><b>Identify</b><p>Record the product and its MoA code.</p></div></div><div className="logic-line" /><div className="logic-step"><span>02</span><div><b>Separate</b><p>Exclude the previous group from the next spray.</p></div></div><div className="logic-line" /><div className="logic-step"><span>03</span><div><b>Rotate</b><p>Select a different group targeting the same pest.</p></div></div></div>
