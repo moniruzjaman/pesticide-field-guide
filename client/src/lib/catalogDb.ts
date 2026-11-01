@@ -1,7 +1,7 @@
 import type { CatalogProduct } from "@/data/products";
 
 const DB_NAME = "agrichem-pro-field-guide";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE = "products";
 const META = "metadata";
 
@@ -32,7 +32,7 @@ export async function seedOrLoadCatalog(seed: CatalogProduct[]) {
     const store = tx.objectStore(STORE);
     store.clear();
     seed.forEach((product) => store.put(product));
-    tx.objectStore(META).put({ key: "catalog", rowCount: seed.length, updatedAt: new Date().toISOString(), schemaVersion: 1 });
+    tx.objectStore(META).put({ key: "catalog", rowCount: seed.length, updatedAt: new Date().toISOString(), schemaVersion: 2 });
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
@@ -47,7 +47,7 @@ export async function persistCatalog(products: CatalogProduct[]) {
     const store = tx.objectStore(STORE);
     store.clear();
     products.forEach((product) => store.put(product));
-    tx.objectStore(META).put({ key: "catalog", rowCount: products.length, updatedAt: new Date().toISOString(), schemaVersion: 1 });
+    tx.objectStore(META).put({ key: "catalog", rowCount: products.length, updatedAt: new Date().toISOString(), schemaVersion: 2 });
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
