@@ -141,9 +141,15 @@ footer { padding: 54px 10vw 30px; color: var(--paper); background: var(--forest-
 .notice-bar svg { flex: 0 0 auto; }
 .notice-bar button { display: inline-flex; align-items: center; gap: 5px; margin-left: auto; color: #8e4934; background: transparent; font-size: 10px; white-space: nowrap; }
 .finder-toolbar { display: flex; align-items: center; gap: 11px; margin: 25px 0 14px; }
-.search-wrap { display: flex; align-items: center; gap: 9px; min-width: 300px; padding: 12px 14px; background: var(--paper-soft); border: 1px solid var(--line); color: var(--ink-soft); }
+.search-wrap { display: flex; align-items: center; gap: 9px; min-width: 300px; padding: 12px 14px; background: var(--paper-soft); border: 1px solid var(--line); color: var(--ink-soft); transition: border-color .18s ease, box-shadow .18s ease; }
+.search-wrap:focus-within { border-color: var(--forest); box-shadow: 0 0 0 3px rgba(44,85,64,.08); }
 .search-wrap input { width: 100%; outline: 0; border: 0; background: transparent; color: var(--ink); font-size: 12px; }
 .search-wrap input::placeholder { color: #92a099; }
+.search-clear { display: grid; place-items: center; flex: 0 0 auto; padding: 3px; color: var(--ink-soft); background: transparent; }
+.search-clear:hover { color: var(--forest); }
+.search-hint { display: flex; align-items: center; gap: 9px; margin: -5px 0 11px; color: #87958d; font: 9px "DM Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+.search-hint span { color: var(--terracotta); }
+.search-hint em { font: 10px "DM Sans", sans-serif; letter-spacing: 0; text-transform: none; font-style: normal; color: #87958d; }
 .filter-select { display: flex; align-items: center; gap: 8px; padding: 0 11px; color: var(--ink-soft); border: 1px solid var(--line); background: var(--paper-soft); }
 .filter-select select { appearance: none; padding: 12px 4px; outline: 0; border: 0; background: transparent; color: var(--ink); font-size: 11px; }
 .result-count { margin-left: auto; color: var(--ink-soft); font: 10px "DM Mono", monospace; }
@@ -167,7 +173,8 @@ footer { padding: 54px 10vw 30px; color: var(--paper); background: var(--forest-
 .row-arrow { color: var(--ink-soft); }
 .empty-state { padding: 70px 20px; text-align: center; color: var(--ink-soft); }
 .empty-state h3 { margin-top: 12px; color: var(--forest); font-size: 27px; }
-.empty-state p { margin-top: 7px; font-size: 12px; }
+.empty-state p { max-width: 430px; margin: 7px auto 18px; font-size: 12px; line-height: 1.6; }
+.empty-state .button-outline { display: inline-flex; align-items: center; gap: 7px; }
 .rotation-callout { min-width: 195px; padding: 18px; border-left: 3px solid var(--terracotta); background: var(--paper-soft); box-shadow: var(--shadow); }
 .rotation-callout span { display: block; color: var(--terracotta); font: 9px "DM Mono", monospace; letter-spacing: .1em; }
 .rotation-callout strong { display: block; margin-top: 10px; color: var(--forest); font: 24px/1.05 "DM Serif Display", Georgia, serif; }

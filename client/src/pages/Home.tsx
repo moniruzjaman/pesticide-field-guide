@@ -79,7 +79,58 @@ const schemeLabels: Record<Scheme, string> = {
 function splitValues(value: string) {
   return value.split(" · ").map((item) => item.trim()).filter(Boolean);
 }
-
+const searchAliases: Record<string, string[]> = {
+  paddy: ["rice"],
+  rice: ["paddy"],
+  eggplant: ["brinjal"],
+  brinjal: ["eggplant"],
+  chilli: ["chili"],
+  chili: ["chilli"],
+  corn: ["maize"],
+  maize: ["corn"],
+  pesticide: ["product", "chemical"],
+  chemical: ["pesticide", "product"],
+};
+function normalizeSearchText(value: string) {
+  return value
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+function searchTokens(value: string) {
+  return normalizeSearchText(value).split(/\s+/).filter((token) => token.length > 1);
+}
+function productSearchText(product: Product) {
+  return normalizeSearchText([
+    product.productId,
+    product.trade,
+    product.ingredient,
+    product.category,
+    product.reg,
+    product.holder,
+    product.crop,
+    product.pest,
+    product.dosage,
+    product.moa,
+    ...product.moaCodes,
+  ].join(" "));
+}
+function productSearchScore(product: Product, query: string) {
+  const normalized = normalizeSearchText(query);
+  if (!normalized) return 0;
+  const trade = normalizeSearchText(product.trade);
+  const ingredient = normalizeSearchText(product.ingredient);
+  const id = normalizeSearchText(`${product.productId} ${product.reg}`);
+  const text = productSearchText(product);
+  if (id === normalized) return 100;
+  if (trade === normalized || ingredient === normalized) return 90;
+  if (id.startsWith(normalized)) return 80;
+  if (trade.startsWith(normalized) || ingredient.startsWith(normalized)) return 70;
+  if (text.includes(normalized)) return 50;
+  return 10;
+}
 function formatNumber(value: number) {
   return new Intl.NumberFormat("en-US").format(value);
 }
@@ -275,30 +326,26 @@ export default function Home() {
     [catalog],
   );
   const filteredProducts = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    return catalog.filter((product) => {
-      const searchable = [
-        product.productId,
-        product.trade,
-        product.ingredient,
-        product.reg,
-        product.holder,
-        product.crop,
-        product.pest,
-        product.dosage,
-        product.moa,
-        ...product.moaCodes,
-      ]
-        .join(" ")
-        .toLowerCase();
-      return (
-        (!normalizedQuery || searchable.includes(normalizedQuery)) &&
-        (scheme === "All systems" || (scheme === "Unmapped" ? product.mappingStatus === "unmapped" : product.moaCodes.some((code) => code.startsWith(scheme)))) &&
-        (cropFilter === "All crops" || splitValues(product.crop).includes(cropFilter)) &&
-        (pestFilter === "All pests" || splitValues(product.pest).includes(pestFilter)) &&
-        (categoryFilter === "All categories" || product.category === categoryFilter)
-      );
-    });
+    const tokens = searchTokens(query);
+    return catalog
+      .filter((product) => {
+        const searchable = productSearchText(product);
+        const matchesQuery = tokens.every((token) => {
+          const aliases = searchAliases[token] ?? [];
+          return [token, ...aliases].some((candidate) => searchable.includes(candidate));
+        });
+        return (
+          matchesQuery &&
+          (scheme === "All systems" || (scheme === "Unmapped" ? product.mappingStatus === "unmapped" : product.moaCodes.some((code) => code.startsWith(scheme)))) &&
+          (cropFilter === "All crops" || splitValues(product.crop).includes(cropFilter)) &&
+          (pestFilter === "All pests" || splitValues(product.pest).includes(pestFilter)) &&
+          (categoryFilter === "All categories" || product.category === categoryFilter)
+        );
+      })
+      .sort((a, b) => {
+        const score = productSearchScore(b, query) - productSearchScore(a, query);
+        return score || a.trade.localeCompare(b.trade) || a.productId.localeCompare(b.productId);
+      });
   }, [catalog, query, scheme, cropFilter, pestFilter, categoryFilter]);
 
   const pageCount = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
@@ -311,6 +358,7 @@ export default function Home() {
     setPestFilter("All pests");
     setCategoryFilter("All categories");
   };
+  const clearSearch = () => setQuery("");
 
   const navigate = (target: Section) => {
     setLocation(target === "overview" ? "/" : `/${target}`);
@@ -450,15 +498,16 @@ export default function Home() {
         <main className="workspace-page">
           <div className="page-heading"><div><span className="section-kicker">PRODUCT INDEX / V2 CATALOG</span><h1>{copy.productTitle}</h1><p>{copy.productDesc}</p></div><div className="page-heading-mark"><Database size={22} /><span>v2 schema<br />{catalogReady ? "database ready" : "loading catalog"}</span></div></div>
           <div className="notice-bar"><CircleAlert size={16} /><span>{formatNumber(stats.rows)} catalog rows loaded. {formatNumber(stats.mappedRows)} have IRAC, FRAC, or HRAC links; unmatched rows remain visible instead of being inferred.</span><button onClick={clearFilters}><RotateCcw size={14} /> Clear all filters</button></div>
-          <div className="finder-toolbar"><div className="search-wrap"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search product, AI, holder, crop, pest, MoA…" /></div><span className="result-count">{formatNumber(filteredProducts.length)} matching · page {page} / {pageCount}</span></div>
+          <div className="finder-toolbar"><div className="search-wrap"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search product, AI, crop, pest, MoA…" aria-label="Search the product catalog" />{query && <button className="search-clear" onClick={clearSearch} aria-label="Clear search"><X size={15} /></button>}</div><span className="result-count">{formatNumber(filteredProducts.length)} matching · page {page} / {pageCount}</span></div>
+          <div className="search-hint"><span>SMART SEARCH</span><em>Uses every word · accepts crop aliases like paddy / rice and brinjal / eggplant · ranks exact matches first</em></div>
           <div className="advanced-filter-row">
             <div className="filter-select"><Sprout size={15} /><select value={cropFilter} onChange={(event) => setCropFilter(event.target.value)}>{cropOptions.map((option) => <option key={option}>{option}</option>)}</select><ChevronDown size={15} /></div>
             <div className="filter-select"><Activity size={15} /><select value={pestFilter} onChange={(event) => setPestFilter(event.target.value)}>{pestOptions.map((option) => <option key={option}>{option}</option>)}</select><ChevronDown size={15} /></div>
             <div className="filter-select"><Filter size={15} /><select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>{categoryOptions.map((option) => <option key={option}>{option}</option>)}</select><ChevronDown size={15} /></div>
             <div className="filter-select"><GitBranch size={15} /><select value={scheme} onChange={(event) => setScheme(event.target.value as Scheme)}>{Object.entries(schemeLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select><ChevronDown size={15} /></div>
           </div>
-          <div className="active-filter-strip"><span>Filters / ফিল্টার</span>{[cropFilter, pestFilter, categoryFilter, scheme].filter((value) => !value.startsWith("All")).map((filter) => <button key={filter} onClick={() => filter === cropFilter ? setCropFilter("All crops") : filter === pestFilter ? setPestFilter("All pests") : filter === categoryFilter ? setCategoryFilter("All categories") : setScheme("All systems")}>{filter} <X size={12} /></button>)}{[cropFilter, pestFilter, categoryFilter, scheme].every((value) => value.startsWith("All")) && <em>No filters applied</em>}</div>
-          <div className="product-table-wrap"><table className="product-table"><thead><tr><th>Product / active ingredient</th><th>Category</th><th>Registered</th><th>Crop / target</th><th>Dosage</th><th>MoA</th><th /></tr></thead><tbody>{visibleProducts.map((product) => <tr key={product.productId} onClick={() => setSelected(product)} tabIndex={0} onKeyDown={(event) => { if (event.key === "Enter") setSelected(product); }}><td><div className="product-name">{product.trade || "Unnamed entry"}</div><div className="product-ai">{product.ingredient || "Active ingredient not provided"} · {product.productId}</div></td><td><Badge tone={product.tone}>{product.category || "Uncategorised"}</Badge></td><td className="mono">{product.reg || "—"}</td><td><div className="crop-text">{product.crop || "—"}</div><div className="pest-text">{product.pest || "Target not provided"}</div></td><td className="mono dosage">{product.dosage || "—"}</td><td><Badge tone={product.tone}>{product.moa}</Badge></td><td><ArrowUpRight className="row-arrow" size={16} /></td></tr>)}</tbody></table>{filteredProducts.length === 0 && <div className="empty-state"><Search size={28} /><h3>No matching rows</h3><p>Try a trade name, pest, crop, holder, or MoA code.</p></div>}</div>
+          <div className="active-filter-strip"><span>Filters / ফিল্টার</span>{query && <button onClick={clearSearch}>Search: {query} <X size={12} /></button>}{[cropFilter, pestFilter, categoryFilter, scheme].filter((value) => !value.startsWith("All")).map((filter) => <button key={filter} onClick={() => filter === cropFilter ? setCropFilter("All crops") : filter === pestFilter ? setPestFilter("All pests") : filter === categoryFilter ? setCategoryFilter("All categories") : setScheme("All systems")}>{filter} <X size={12} /></button>)}{!query && [cropFilter, pestFilter, categoryFilter, scheme].every((value) => value.startsWith("All")) && <em>No filters applied</em>}</div>
+          <div className="product-table-wrap"><table className="product-table"><thead><tr><th>Product / active ingredient</th><th>Category</th><th>Registered</th><th>Crop / target</th><th>Dosage</th><th>MoA</th><th /></tr></thead><tbody>{visibleProducts.map((product) => <tr key={product.productId} onClick={() => setSelected(product)} tabIndex={0} onKeyDown={(event) => { if (event.key === "Enter") setSelected(product); }}><td><div className="product-name">{product.trade || "Unnamed entry"}</div><div className="product-ai">{product.ingredient || "Active ingredient not provided"} · {product.productId}</div></td><td><Badge tone={product.tone}>{product.category || "Uncategorised"}</Badge></td><td className="mono">{product.reg || "—"}</td><td><div className="crop-text">{product.crop || "—"}</div><div className="pest-text">{product.pest || "Target not provided"}</div></td><td className="mono dosage">{product.dosage || "—"}</td><td><Badge tone={product.tone}>{product.moa}</Badge></td><td><ArrowUpRight className="row-arrow" size={16} /></td></tr>)}</tbody></table>{filteredProducts.length === 0 && <div className="empty-state"><Search size={28} /><h3>No matching rows</h3><p>Search uses every word. Try a shorter phrase, clear a filter, or search by product, ingredient, crop, pest, registration, or MoA code.</p><button className="button-outline" onClick={clearFilters}>Reset finder <RotateCcw size={14} /></button></div>}</div>
           {filteredProducts.length > 0 && <div className="pagination-row"><span>Showing {formatNumber((page - 1) * pageSize + 1)}–{formatNumber(Math.min(page * pageSize, filteredProducts.length))} of {formatNumber(filteredProducts.length)}</span><div><button disabled={page === 1} onClick={() => setPage((current) => Math.max(1, current - 1))}><ArrowLeft size={14} /> Previous</button><button disabled={page === pageCount} onClick={() => setPage((current) => Math.min(pageCount, current + 1))}>Next <ArrowUpRight size={14} /></button></div></div>}
         </main>
       )}
